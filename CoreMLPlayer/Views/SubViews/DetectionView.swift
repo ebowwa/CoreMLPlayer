@@ -32,7 +32,7 @@ struct DetectionView: View {
                         .offset(x: videoRect.origin.x, y: videoRect.origin.y)
                         .overlay {
                             GeometryReader { videoGeometry in
-                                forEachBB(detectedObjects: detectedObjects, geometry: videoGeometry)
+                                forEachBB(detectedObjects: detectedObjects, geometry: videoGeometry, videoSize: videoSize)
                             }
                         }
                 }
@@ -62,10 +62,10 @@ struct DetectionView: View {
         return CGRect(x: offsetX, y: offsetY, width: width, height: height)
     }
     
-    func forEachBB(detectedObjects: [DetectedObject], geometry: GeometryProxy) -> some View {
+    func forEachBB(detectedObjects: [DetectedObject], geometry: GeometryProxy, videoSize: CGSize? = nil) -> some View {
         ForEach(detectedObjects) { obj in
             let confidence = Double(obj.confidence) ?? 0
-            let drawingRect = base.prepareObjectForSwiftUI(object: obj, geometry: geometry)
+            let drawingRect = base.prepareObjectForSwiftUI(object: obj, geometry: geometry, videoSize: videoSize)
             if drawSettings.confidenceFiltered && confidence < drawSettings.confidenceLimit {
                 EmptyView()
             } else {

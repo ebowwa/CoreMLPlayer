@@ -153,10 +153,33 @@ class Base {
         }
     }
     
-    func prepareObjectForSwiftUI(object: DetectedObject, geometry: GeometryProxy) -> CGRect {
+    func prepareObjectForSwiftUI(object: DetectedObject, geometry: GeometryProxy, videoSize: CGSize? = nil) -> CGRect {
         let objectRect = CGRect(x: object.x, y: object.y, width: object.width, height: object.height)
-        
-        return rectForNormalizedRect(normalizedRect: objectRect, width: Int(geometry.size.width), height: Int(geometry.size.height))
+
+        // Use actual video dimensions for coordinate transformation if available
+        // This ensures detection boxes are rendered correctly when video is letterboxed/pillarboxed
+        let transformWidth: Int
+        let transformHeight: Int
+
+        if let videoSize = videoSize, videoSize.width > 0 && videoSize.height > 0 {
+            transformWidth = Int(videoSize.width)
+            transformHeight = Int(videoSize.height)
+        } else {
+            // Fallback to geometry size for backward compatibility
+            transformWidth = Int(geometry.size.width)
+            transformHeight = Int(geometry.size.height)
+        }
+
+        let transformedRect = rectForNormalizedRect(normalizedRect: objectRect, width: transformWidth, height: transformHeight)
+
+        // If we used video dimensions for transformation, scale the result to fit the geometry
+        if let videoSize = videoSize, videoSize.width > 0 && videoSize.height > 0 {
+            let scaleX = geometry.size.width / videoSize.width
+            let scaleY = geometry.size.height / videoSize.height
+            return transformedRect.applying(CGAffineTransform(scaleX: scaleX, y: scaleY))
+        }
+
+        return transformedRect
     }
     
     func rectForNormalizedRect(normalizedRect: CGRect, width: Int, height: Int) -> CGRect {
