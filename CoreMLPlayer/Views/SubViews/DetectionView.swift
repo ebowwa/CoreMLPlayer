@@ -24,7 +24,8 @@ struct DetectionView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            if let videoSize, let videoRect = getVideoRect(geometrySize: geometry.size, videoSize: videoSize) {
+            if let videoSize {
+                let videoRect = getVideoRect(geometrySize: geometry.size, videoSize: videoSize)
                 ZStack {
                     VStack { EmptyView() }
                         .frame(width: videoRect.width, height: videoRect.height)
